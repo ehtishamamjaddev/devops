@@ -1,0 +1,9 @@
+# Local Python environment and notebook runtime files
+.venv/
+.ipython/
+.jupyter/
+run_covertype_notebook.py
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
