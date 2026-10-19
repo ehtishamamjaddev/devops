@@ -71,10 +71,26 @@ Production builds are configured as static previews: prediction is disabled beca
 
 ## GitHub Actions and Pages
 
-`.github/workflows/ci.yml` runs backend schema/API tests and builds the Angular app on pushes and pull requests to `main`. `.github/workflows/pages.yml` publishes the static Angular build at `https://ehtishamamjaddev.github.io/devops/` after the workflow is pushed to GitHub. In repository **Settings → Pages**, choose **GitHub Actions** as the source if Pages has not been configured. The public page is static; local Flask inference is not available there.
+`.github/workflows/ci.yml` runs the Flask API tests and Angular production build on pushes and pull requests to `main`. `.github/workflows/pages.yml` listens for completion of that CI workflow and deploys only a successful push to `main`; failed CI runs are skipped. You can also start a Pages deployment manually from **Actions ? Deploy Angular to GitHub Pages ? Run workflow**. The deploy job builds Angular with the repository base path and publishes `frontend/dist/forest-cover/browser`.
 
-The repository source is [github.com/ehtishamamjaddev/devops](https://github.com/ehtishamamjaddev/devops). The Pages URL is expected after a successful deployment; this local setup cannot report a completed remote workflow run.
+The published GitHub Pages site is a static frontend: it cannot run Flask or host the trained model. For predictions, run the Flask API and Angular development server locally using the commands above; the development proxy forwards `/api` requests to Flask. To make inference work for all Pages visitors, deploy Flask and its model bundle to a separate API host, then configure the frontend to call that host and allow the Pages origin in the API's CORS policy.
 
+The repository source is [github.com/ehtishamamjaddev/devops](https://github.com/ehtishamamjaddev/devops). The Pages URL is https://ehtishamamjaddev.github.io/devops/.
+
+## Manual viva workflow
+
+1. Make and save a visible change in VS Code, such as the `<title>` in `frontend/src/index.html`.
+2. From the repository root, stage, commit, and push it:
+
+   ```powershell
+   git add frontend/src/index.html
+   git commit -m "Update page title"
+   git push origin main
+   ```
+
+3. In GitHub **Actions**, show the **Full-stack CI** run. It must pass the backend tests and Angular build.
+4. After CI succeeds for the `main` push, show **Deploy Angular to GitHub Pages** building and deploying the same commit. Open the Pages URL and hard-refresh with Ctrl+F5 to show the change.
+5. To demonstrate the backend, start the trained local Flask API and Angular dev server in separate terminals. Check `/health`, then submit the form at `http://localhost:4200`. GitHub Pages itself demonstrates the static frontend; it does not host the Flask inference service.
 ## Development checks
 
 ```powershell
