@@ -1,0 +1,1 @@
+"""Covertype inference service."""

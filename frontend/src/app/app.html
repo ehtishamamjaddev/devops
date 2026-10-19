@@ -1,0 +1,145 @@
+<div class="site-shell">
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Forest Cover Studio home">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span>FIELDNOTE<span class="brand-separator">/</span>FOREST</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#overview">Overview</a>
+      <a href="#workspace">Classifier</a>
+      <a href="#method">Method</a>
+    </nav>
+    <div class="topbar-status">
+      <span class="status-dot" [class.ready]="apiReady"></span>
+      <span>{{ staticDemo ? 'STATIC PREVIEW' : apiReady ? 'LOCAL MODEL ONLINE' : 'LOCAL MODEL OFFLINE' }}</span>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" id="overview">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> TERRAIN INTELLIGENCE · RESEARCH EDITION</p>
+        <h1>Read the<br><em>shape of a forest.</em></h1>
+        <p class="hero-description">A field-ready interface for exploring forest cover signals across terrain, water, sunlight and soil.</p>
+        <div class="hero-actions">
+          <a class="button button-dark" href="#workspace">Open the classifier <span aria-hidden="true">↘</span></a>
+          <span class="hero-note"><span class="tiny-dot"></span> 54 terrain &amp; soil signals</span>
+        </div>
+        <div class="hero-meta">
+          <div><span class="meta-value">581,012</span><span class="meta-label">observations</span></div>
+          <div><span class="meta-value">07</span><span class="meta-label">cover classes</span></div>
+          <div><span class="meta-value">01</span><span class="meta-label">research model</span></div>
+        </div>
+      </div>
+      <div class="hero-art" role="img" aria-label="Illustrated forest canopy and contour map">
+        <div class="art-label art-label-top"><span>ROCKY MOUNTAIN REGION</span><span>38° 54′ N / 105° 34′ W</span></div>
+        <div class="contour contour-one"></div><div class="contour contour-two"></div><div class="contour contour-three"></div>
+        <div class="ridge ridge-back"></div><div class="ridge ridge-mid"></div><div class="ridge ridge-front"></div>
+        <div class="sun-disc"></div>
+        <div class="forest-stamp"><span>CO</span><span>U.S. FOREST<br>LANDSCAPE</span></div>
+        <div class="art-label art-label-bottom"><span>LANDSCAPE SERIES</span><span>01 — 07</span></div>
+      </div>
+    </section>
+
+    <section class="intro-strip" id="method">
+      <p class="section-index">01 <span>/</span> THE PROJECT</p>
+      <p class="intro-text">One landscape, <em>many signals.</em><br><span>Explore how a fitted classification pipeline reads a place.</span></p>
+      <p class="intro-caption">Built around the UCI Covertype dataset and the original model-comparison notebook.</p>
+    </section>
+
+    <section class="workspace-section" id="workspace">
+      <div class="workspace-heading">
+        <div><p class="eyebrow"><span class="eyebrow-line"></span> 02 / MODEL WORKSPACE</p><h2>Describe a plot.</h2></div>
+        <button class="text-button" type="button" (click)="loadSample()"><span aria-hidden="true">↺</span> Load sample plot</button>
+      </div>
+
+      @if (staticDemo) {
+        <aside class="deployment-note" role="status">
+          <span class="note-icon" aria-hidden="true">i</span>
+          <span><strong>Static field preview</strong> — GitHub Pages serves this interface only. Run the Flask service and model locally to make predictions.</span>
+        </aside>
+      } @else if (!apiReady) {
+        <aside class="deployment-note muted-note" role="status">
+          <span class="note-icon" aria-hidden="true">↗</span>
+          <span><strong>Local model is offline.</strong> Start Flask after training the model bundle; your inputs stay in this browser until you submit.</span>
+        </aside>
+      }
+
+      <div class="workspace-grid">
+        <form class="input-card" (ngSubmit)="predict()">
+          <div class="card-topline"><span class="card-kicker">FIELD RECORD</span><span class="mono-label">INPUT SCHEMA · 54 FIELDS</span></div>
+          <div class="form-section-title"><span class="section-number">A</span><div><h3>Terrain &amp; light</h3><p>Measurements from the landscape</p></div></div>
+          <div class="terrain-grid">
+            @for (feature of terrainFeatures; track feature.name) {
+              <label class="field-control">
+                <span class="field-label">{{ feature.label }} <small>{{ feature.unit }}</small></span>
+                <input type="number" [name]="feature.name" [(ngModel)]="values[feature.name]" [min]="feature.min" [max]="feature.max" [step]="feature.step" required>
+              </label>
+            }
+          </div>
+          <div class="form-divider"></div>
+          <div class="form-section-title"><span class="section-number">B</span><div><h3>Land signature</h3><p>Choose one category in each group</p></div></div>
+          <div class="select-grid">
+            <label class="field-control"><span class="field-label">Wilderness area <small>one selection</small></span>
+              <select name="wilderness" [ngModel]="selectedWilderness" (ngModelChange)="setWilderness($event)" required>
+                @for (area of wildernessAreas; track area.key) { <option [value]="area.key">{{ area.label }}</option> }
+              </select>
+            </label>
+            <label class="field-control"><span class="field-label">Soil type <small>one selection</small></span>
+              <select name="soil" [ngModel]="selectedSoil" (ngModelChange)="setSoil($event)" required>
+                @for (soil of soilTypes; track soil.key) { <option [value]="soil.key">{{ soil.label }}</option> }
+              </select>
+            </label>
+          </div>
+          <div class="form-footer">
+            <span class="form-footnote"><span class="tiny-dot"></span> 10 numeric · 44 encoded indicators</span>
+            <button class="button button-green" type="submit" [disabled]="staticDemo || busy || !apiReady">
+              @if (busy) { <span>Reading terrain…</span> } @else { <span>Run local inference</span><span aria-hidden="true">↗</span> }
+            </button>
+          </div>
+          @if (errorMessage) { <p class="error-message" role="alert">{{ errorMessage }}</p> }
+        </form>
+
+        <aside class="result-card" aria-live="polite">
+          <div class="result-card-top"><span class="card-kicker">FIELDNOTE</span><span class="result-orbit" aria-hidden="true">✳</span></div>
+          @if (result) {
+            <div class="result-content">
+              <p class="result-overline">MOST LIKELY COVER TYPE · CLASS {{ result.prediction.id }}</p>
+              <h3>{{ result.prediction.name }}<span>.</span></h3>
+              <p class="result-copy">The model found this class most likely for the measurements you entered.</p>
+              <div class="probability-list">
+                @for (row of probabilityRows; track row.id) {
+                  <div class="probability-row" [class.leading]="$first">
+                    <div class="probability-label"><span>{{ row.label }}</span><span>{{ (row.value * 100) | number:'1.0-1' }}%</span></div>
+                    <div class="probability-track"><span [style.width.%]="row.value * 100"></span></div>
+                  </div>
+                }
+              </div>
+              <p class="result-disclaimer">{{ result.disclaimer }}</p>
+            </div>
+          } @else {
+            <div class="empty-result">
+              <div class="empty-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+              <p class="result-overline">YOUR FIELDNOTE</p>
+              <h3>Awaiting<br><em>the landscape.</em></h3>
+              <p class="result-copy">Enter a plot profile, then run the local model to see its seven class probabilities.</p>
+              <div class="class-preview">
+                <span>01 Spruce / fir</span><span>02 Lodgepole pine</span><span>03 Ponderosa pine</span><span>+ 4 more cover classes</span>
+              </div>
+            </div>
+          }
+          <div class="result-footer"><span>{{ staticDemo ? 'PUBLIC STATIC INTERFACE' : 'LOCAL INFERENCE ONLY' }}</span><span>RESEARCH / 2026</span></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="method-strip">
+      <div><span class="method-index">01</span><h3>Measure</h3><p>Terrain, hydrology, light and mapped soil indicators.</p></div>
+      <div><span class="method-index">02</span><h3>Classify</h3><p>Fitted HistGradientBoosting pipeline from the notebook workflow.</p></div>
+      <div><span class="method-index">03</span><h3>Explore</h3><p>Seven cover classes with per-class model probabilities.</p></div>
+    </section>
+    <p class="ethics-note">An educational research prototype using U.S. Forest Service plot data. Predictions are estimates, not a substitute for field surveys or ecological expertise.</p>
+  </main>
+
+  <footer class="site-footer"><a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span><span>FIELDNOTE<span class="brand-separator">/</span>FOREST</span></a><span>CO GREEN · LANDSCAPE INTELLIGENCE</span><span>© 2026 · RESEARCH BUILD</span></footer>
+</div>

@@ -1,9 +1,24 @@
 # Local Python environment and notebook runtime files
 .venv/
+.venv-*/
+.python-version
 .ipython/
 .jupyter/
 run_covertype_notebook.py
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.coverage
+.env
+.env.*
+!.env.example
+# Angular build and dependency outputs
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/out-tsc/
+# Local logs and editor files
+*.log
+.vscode/
 .DS_Store
 Thumbs.db

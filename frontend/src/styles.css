@@ -1,0 +1,6 @@
+:root { color-scheme: light; --paper: #fbfbf8; --canvas: #f4f5ef; --ink: #26382d; --moss: #566d4f; --muted: #7f877b; --line: #dfe3d9; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 25px; }
+body { margin: 0; color: var(--ink); background: var(--canvas); font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; }
+::selection { background: #c5d0b8; color: #24392e; }

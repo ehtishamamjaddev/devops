@@ -1,0 +1,17 @@
+Workspace versions observed during implementation:
+
+Git 2.54.0.windows.1
+Node.js v26.3.0 (supported by Angular 22; CI uses Node 24)
+npm 11.16.0
+Python 3.14.5
+Flask 3.1.3
+joblib 1.6.0
+NumPy 2.5.4
+pandas 3.0.6
+pytest 9.1.1
+scikit-learn 1.9.1 is pinned in backend/requirements.txt but was not installed locally.
+The SciPy wheel download stalled, so local model training and artifact generation remain outstanding.
+
+The GitHub Actions workflow uses Python 3.12 and Node.js 24. Record `git --version`,
+`node --version`, `npm.cmd --version`, `py --version`, and
+`python -m pip --version` again on the machine used for final submission.
