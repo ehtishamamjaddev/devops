@@ -13,6 +13,13 @@ def test_health_and_schema_explain_model_status():
     assert len(schema.json["classes"]) == 7
 
 
+def test_api_root_lists_endpoints_and_frontend():
+    response = app.test_client().get("/")
+    assert response.status_code == 200
+    assert response.json["frontend"] == "http://localhost:4200"
+    assert response.json["endpoints"]["health"] == "/health"
+
+
 def test_prediction_rejects_missing_or_invalid_schema():
     client = app.test_client()
     missing = client.post("/predict", json={})

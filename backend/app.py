@@ -30,6 +30,21 @@ def load_bundle() -> dict[str, Any] | None:
     return joblib.load(BUNDLE_PATH)
 
 
+@app.get("/")
+def index():
+    return jsonify(
+        service="Fieldnote / Forest API",
+        status="ok",
+        frontend="http://localhost:4200",
+        endpoints={
+            "health": "/health",
+            "schema": "/schema",
+            "predict": "POST /predict",
+        },
+        prediction_ready=load_bundle() is not None,
+    )
+
+
 @app.get("/health")
 def health():
     bundle = load_bundle()
